@@ -151,7 +151,8 @@ while (true) {
 
     // 2. For each friendly factory
     const friendlyFactories = <Factory[]>getFriendly(factories);
-    const targetableFactories = <Factory[]>getTargetable(factories);
+    const targetableFactories = (<Factory[]>getTargetable(factories))
+    .filter((f) => f.production > 0); // TEMP - ignore neutral bases with 0 production
     const friendlyTroops = <Troop[]>getFriendly(troops);
     
     friendlyFactories.forEach(factory => {
@@ -198,6 +199,9 @@ while (true) {
  * 
  * Improvements
  * - sort adjMatrix by distance (more efficient attacks will be favoured)
+ * - favor targets where production > 0
+ *  - I think these targets have 0 value as of now since we arent boosting them or 
+ *    considering multi-step connections
  * - use bombs
  * - consider enemy bombs
  *  - scatter troops from factories with high cyborg counts?
