@@ -166,7 +166,7 @@ while (true) {
             // Remove non-adjacent factories
             if (distance === 0) return false; 
             
-            const requiredCyborgs = target.numCyborgs + target.production * distance + 1; // TODO - is +1 necessary? Can we control with an even match?
+            const requiredCyborgs = target.cyborgsAfterTurns(distance+1) + 1; // TODO - is +1 necessary? Can we control with an even match?
             
             // Remove factories that are too powerful
             if (requiredCyborgs > factory.numCyborgs) return false; 
