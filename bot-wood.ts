@@ -1,4 +1,5 @@
-/** CLASSeS */
+/** CLASSES */
+
 class Entity {
     id: number;
     owner: number;
@@ -23,27 +24,27 @@ class Bomb extends Entity {
 class Factory extends Entity {
     numCyborgs: number;
     production: number;
-    disabledTurns: number;
-
+    stunned = 0;
     constructor(id) {
         super();
         this.id = id;
     }
 
+    tick() {
+
+    }
+
     cyborgsAfterTurns(turns: number): number {
         return this.numCyborgs + this.generatedAfterTurns(turns);
     }
-
     generatedAfterTurns(turns: number): number {
-        turns -= this.disabledTurns;
-        return turns <= 0 ? 0 : this.production * turns;
+        return this.production * turns;
     }
 
-    update(owner: number, numCyborgs: number, production: number, disabledTurns: number) {
+    update(owner: number, numCyborgs: number, production: number) {
         this.owner = owner;
         this.numCyborgs = numCyborgs;
         this.production = production;
-        this.disabledTurns = disabledTurns;
     }
 
     log(...args) {
@@ -71,21 +72,23 @@ const getEnemy = (entities: Entity[]) => entities.filter(e=>e.isEnemy());
 
 const attackMove = (sId, tId, numCyborgs) => `MOVE ${sId} ${tId} ${numCyborgs}`;
 const bombMove = (sId, tId) => `BOMB ${sId} ${tId}`
-const incMove = (id) => `INC ${id}`;
 
 /** HANDLE INPUT */
 const factories: Factory[] = [];
-const adjList: [factoryId: number, distance: number][][] = [];
-const adjMatrix: number[][] = [];
+const adjList = [];
+const adjMatrix = [];
 
-const factoryCount: number = parseInt(readline());
+const factoryCount: number = parseInt(readline()); // the number of factories
+
 for(let i = 0; i < factoryCount; i++) {
     factories.push(new Factory(i));
     adjList.push([]);
     adjMatrix.push('0'.repeat(factoryCount).split('').map(v=>parseInt(v)));
+
 }
 
-const linkCount: number = parseInt(readline());
+
+const linkCount: number = parseInt(readline()); // the number of links between factories
 for (let i = 0; i < linkCount; i++) {
     var inputs: string[] = readline().split(' ');
     const factory1: number = parseInt(inputs[0]);
@@ -97,6 +100,7 @@ for (let i = 0; i < linkCount; i++) {
     adjMatrix[factory1][factory2] = distance;
     adjMatrix[factory2][factory1] = distance;
 }
+
 
 /** GAME LOOP */
 while (true) {
@@ -114,7 +118,7 @@ while (true) {
         const arg5: number = parseInt(inputs[6]);
 
         if (entityType === 'FACTORY') {
-            factories[entityId].update(arg1, arg2, arg3, arg4);
+            factories[entityId].update(arg1, arg2, arg3);
         } else if (entityType === 'TROOP') {
             troops.push(new Troop(entityId, arg1, arg2, arg3, arg4, arg5));
         } else if (entityType === 'BOMB') {
@@ -123,8 +127,8 @@ while (true) {
     }
 
     const moves = [];
-    
-    // Move logic
+
+    // For each friendly factory, consider our moves
 
     // 1. If there are any incoming troops, decrease our factories available cyborgs by the troop size
     const enemyTroops = <Troop[]>getEnemy(troops);
@@ -149,14 +153,12 @@ while (true) {
         }
     });
 
-    // 2. For each friendly factory
+    // 2. For each friendly factory, check for available targets
     const friendlyFactories = <Factory[]>getFriendly(factories);
-    const targetableFactories = (<Factory[]>getTargetable(factories))
-    .filter((f) => f.production > 0); // TEMP - ignore neutral bases with 0 production
+    const targetableFactories = <Factory[]>getTargetable(factories);
     const friendlyTroops = <Troop[]>getFriendly(troops);
     
     friendlyFactories.forEach(factory => {
-        // 2A - Attempt to attack an opposing factory
         targetableFactories.forEach((target) => {
             // Remove factories that are already under attack
             if (friendlyTroops.find((troop) => troop.targetId === target.id)) return false;
@@ -181,11 +183,6 @@ while (true) {
             friendlyTroops.push(new Troop(-1, 1, factory.id, target.id, requiredCyborgs, distance));
         });
 
-        // 2B - Attempt to upgrade production
-        if (factory.production < 3 && factory.numCyborgs >=10) {
-            moves.push(incMove(factory.id));
-            factory.numCyborgs-=10;
-        }
     })
 
     // Take turn
@@ -193,21 +190,13 @@ while (true) {
 }
 
 /**
-
- * Fixes
- * - consider the sum of all incoming attacks at once 
- * 
- * Improvements
- * - sort adjMatrix by distance (more efficient attacks will be favoured)
- * - favor targets where production > 0
- *  - I think these targets have 0 value as of now since we arent boosting them or 
- *    considering multi-step connections
+ * NOTES,
+ * quick enhancement would be to sort our adjency matrix by distance, shorted attacks would be prefered
+ * TODO
+ * - consider bombs
  * - use bombs
- * - consider enemy bombs
- *  - scatter troops from factories with high cyborg counts?
  * - use factory enhancement more carefully
- *  - consider vulnerability? 
-* - send troops to help upgrade where production rate = 0?
+ * - send troops to help upgrade where production rate = 0?
  * - support friendlies that are under attack
- * - consider vulnerability when sending troops?
+ * - consider vulnerability when sending troops
  */
