@@ -198,5 +198,5 @@ while (true) {
  * - use factory enhancement more carefully
  * - send troops to help upgrade where production rate = 0?
  * - support friendlies that are under attack
- * - consider vulnerability when sending troops`
+ * - consider vulnerability when sending troops
  */
