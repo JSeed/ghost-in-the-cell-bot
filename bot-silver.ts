@@ -1,5 +1,4 @@
-/** CLASSES */
-
+/** CLASSeS */
 class Entity {
     id: number;
     owner: number;
@@ -76,20 +75,17 @@ const incMove = (id) => `INC ${id}`;
 
 /** HANDLE INPUT */
 const factories: Factory[] = [];
-const adjList = [];
-const adjMatrix = [];
+const adjList: [factoryId: number, distance: number][][] = [];
+const adjMatrix: number[][] = [];
 
-const factoryCount: number = parseInt(readline()); // the number of factories
-
+const factoryCount: number = parseInt(readline());
 for(let i = 0; i < factoryCount; i++) {
     factories.push(new Factory(i));
     adjList.push([]);
     adjMatrix.push('0'.repeat(factoryCount).split('').map(v=>parseInt(v)));
-
 }
 
-
-const linkCount: number = parseInt(readline()); // the number of links between factories
+const linkCount: number = parseInt(readline());
 for (let i = 0; i < linkCount; i++) {
     var inputs: string[] = readline().split(' ');
     const factory1: number = parseInt(inputs[0]);
@@ -196,9 +192,12 @@ while (true) {
 }
 
 /**
- * NOTES,
- * quick enhancement would be to sort our adjency matrix by distance, shorted attacks would be prefered
- * TODO
+
+ * Fixes
+ * - consider the sum of all incoming attacks at once 
+ * 
+ * Improvements
+ * - sort adjMatrix by distance (more efficient attacks will be favoured)
  * - use bombs
  * - consider enemy bombs
  *  - scatter troops from factories with high cyborg counts?
