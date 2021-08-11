@@ -1,0 +1,10 @@
+{
+  "name": "ghost-in-the-cell",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JSeed/ghost-in-the-cell-bot.git"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  }
+}
